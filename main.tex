@@ -1,0 +1,101 @@
+\documentclass[11pt]{article}
+% \setlength{\parindent}{0pt}
+% \setlength{\parskip}{10pt}
+
+% Single line spacing
+\linespread{1}
+
+\usepackage[utf8]{inputenc}
+
+\usepackage{arxiv}
+
+\usepackage{graphicx}
+\usepackage{indentfirst,csquotes}
+\usepackage{amssymb,amsthm,amsmath}
+\usepackage{hyperref}
+\usepackage{cite}
+\usepackage{enumitem}
+\usepackage{lmodern}
+\usepackage{fancyhdr}
+
+% link
+\usepackage{hyperref}
+
+% use table
+\usepackage{float}
+\usepackage{booktabs}
+
+% for timeline work plan in experiment
+\usepackage{pgfgantt}
+
+% rewrite font for compiling warning
+\usepackage{times}
+% rewrite page head
+\rhead{}
+
+% \topmargin= .5cm
+% \textheight= 20cm
+% \textwidth= 32cc
+% \baselineskip=16pt
+% \evensidemargin= .9cm
+% \oddsidemargin= .9cm
+
+
+% \pagestyle{fancy}
+% \fancyhf{}
+% \fancyfoot[C]{\thepage}
+% \renewcommand{\headrulewidth}{0pt}
+
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue,
+  citecolor=black,
+  urlcolor=blue
+}
+
+
+\begin{document}
+
+\title{
+  Steam game revenue analysis
+}
+
+\author{
+  Jia Zhang, Student ID: 1578438
+}
+\date{\today}
+
+\maketitle
+\markboth{}{}
+
+\begin{abstract}
+  
+\end{abstract}
+
+
+\clearpage
+\thispagestyle{empty}
+\tableofcontents
+\thispagestyle{empty}
+
+\clearpage
+\setcounter{page}{1}
+
+
+% https://github.com/jackeen/8812_dw_A2_code
+
+\input{chapters/1.introduction.tex}
+\input{chapters/2.dataset.tex}
+\input{chapters/3.extraction.tex}
+\input{chapters/4.clean.tex}
+\input{chapters/5.results.tex}
+
+
+
+\clearpage
+% \bibliographystyle{ieeetr}
+% \bibliography{ref}
+
+\end{document}
+
