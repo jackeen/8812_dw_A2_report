@@ -1,2 +1,129 @@
 \section{Cleaning of raw data}
 % How are data cleaned to reduce duplicates/errors? Challenges in data cleansing faced.
+In this Steam game dataset, it includes over 110,000 games with 38 nested fields. My motivation is to figure out revenue-related insights from different perspectives, such as language, category, genre. In the next subsections, more details are introduced for this process.
+
+
+\subsection{Challenges and solutions}
+First one is to deal with the large data, which means the process requires more memory to hold the data, this dataset is not big enough to break down the system of my computer, but is also make the experiment become slower lasting over 20 minutes. If the whole experiment is not break by errors or exceptions, it is not a problem. However, the process programming need to debug and test several times for holding all tricks in the data, so, the total cost of time is not acceptable. The solution is to treat the data as a streaming, this strategy is to load enough textual rows and try to convert them into an dictionary of Python, it reduces much memory usage and time consuming. 
+
+The second one is to treat the variant of values in fields. Because of the large number of samples, the exceptions of values cannot be reviewed at one time. It influences the cleaning program development so much, as a developer, they should suppose the values of fields are formatted firstly. When the code is running, there will be errors arising, then, we can trace the code and data to collect the variants. After that, to develop the code to hold the all exceptions. This is a circle like agile development process working, after releasing the code, try to collect feedback, then to patch the code for next releasing until one field of dataset is iterated completely. During this process, developer need to try the methods by several experiments by balancing performance and accuracy. In this part, the solution is to try again and again until the all fields can be handled properly by output standard data or error records.
+
+The third one is to design the pipeline for the selected dataset. Even though, the principles are reviewed during class time and homework, in practice for a real-world issue, there are still some new situations should be treated. For example, the raw dataset is should be convert into an appropriate database with tables, it should be do some reasonable suppose for closing to the reality. 
+
+
+\subsection{Pipeline design}
+Because the cleaning process is started from JSON data, and it cannot be analyzed conveniently, unlike the project that provides the OLTP database with the explicit relationships. This project includes the implicit relations between fields, such as nested data, which blocks the OLAP database establishing. So, a simulated OLTP database is required. Unlike the JSON data, the relational tables should be designed by assigning appropriate type and length of values. Some of them are empty that should be occupied by numbers or strings. Some of them are includes serval pice of information in one string like "review" of games. So the cleaning step should be put at the first place before the data ingested into relational database, which avoids loses the connections between data.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{pics/etl.png}
+    \caption{The process of data cleaning and converting}
+\end{figure}
+
+This process includes three major steps:
+\begin{itemize}
+    \item Read and loop the given JSON, then clean and normalize the value of fields for clear OLTP database, this is hardest step in whole task.
+    \item Translate the data from OLTP into OLAP database.
+    \item Verify and Visualization the data following the motivation goals.
+\end{itemize}
+
+
+\subsection{Destruct nested data strategy}
+The nested fields contain relationships between different levels in the tree structure. In this business, the game field involves several properties. The unnested properties like support email that should be put them with game code and name at the same table. The nested properties should be treated carefully depend on the reality of business. 
+
+For review of the game, in this business, it not the reviews from customers who bought the game. It is the reviews by famous platform for endorsing the specific game. It wraps review words, scores and the name of institution in one string. Because it is the unique field, which means it cannot be quoted by another game, for this kind of data, to use the foreign key to connect them is the good option. But for the review itself, the content should be convert into a table.
+
+As for languages of the game is the very different one. The relationships between languages and games is many to many, which means the procedure need to convert the nested structure into two alternative tables, because one game can support many languages, and games might share the same languages at the same time. Thus, the procedure need to collect all languages first for unique the items of languages, then to recover the relational tables. Others like developers, publishers, categories and genres of the games are also treated as the same way.
+
+
+\subsection{Cleaning and Standardizing}
+The reviews cleaning is the most struggled practice in this project. As before mentioned, this fields include three components in one string, but the format is unstable, which means some includes score part, some not contain it. And in the natural languages, there is no sigh to split the different parts. Popple can split it in second, but traditional programming is hard to handle it. So, I suppose to leverage the ability of LLMs (large language models) to extract the information. LLMs are good at NLP (natural language processing) powered by its attention mechanism \cite{vaswani2017attention}. This project invokes the local deployed LLM by Ollama application to treat this. If the author wrote the score, the LLM can extract them as "rating" and "out\_of" field in review table. Otherwise, these two fields will filled by "Null".
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{pics/review_sample.png}
+    \caption{The example of the review content}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{pics/llm_code.png}
+    \caption{The cleaning procedure by invoking large language model}
+\end{figure}
+
+The previous methods of invoking LLMs is by restful APIs of Ollama service, it is not the only way to use the power of LLMs, developers can also use "transformer"\cite{huggingface_transformers_v4} APIs to invoke them. To drive the LLM working well and outputting the expected results, the best practice is to use prompt, the instructions of LLMs, which can stablish the background of order to lower the unpredictable\cite{xu2025hallucinationinevitableinnatelimitation} results.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{pics/prompt.png}
+    \caption{The prompt (instructions) of large language models}
+\end{figure}
+
+As we can seen, the prompt includes several instructions, which guides itself to work and generate the predicted output. The rules like a programming code drives the LLMs. However, there is a challenge in this project. The time consuming is about 16 seconds per row of review content on my laptop, suppose the half games includes reviews, this subtasks will cause over 100 hours, which means that it consumes huge computing resources, in the final version of cleaning code, I decided disable this functionality for the whole project be reliable.
+
+
+To treat the release date of games is much simple and more efficient. It can be treated by regular expressions due to the limited outliers such as "Month Day Year" and "Month Year" and all of them is not empty. The first step is trying to convert as first format, if failed, the second step will try the second formant converting. In the code, the final exception is handled by returning none, even though the database not includes empty items. As for the second format, the day of the date will set 1st for normalizing the result.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{pics/clean_date_code.png}
+    \caption{The code of cleaning date}
+\end{figure}
+
+
+Language field is slightly complicated then the "release date" field of the game, because the part of values are overlapping across recodes, for example, one record is "English Japanese", another record is "English,French". This task should firstly extract effective language names by regular expressions. By observing the language items, most of them do not need to clean, and effective language name always started from an upper case letter, so, it is easy to extract and filter other noisy chars like "\&". This field includes some non-standard values of the collection after extracting, for example, "Spanish - Spain" is converted as "Spanish" and "Spain" independent two languages, but they are same. So, the convert table is established for this purpose for simplifying the samples of language.
+
+
+\subsection{Reduce duplicates}
+To prevent the duplicated records, there are several ways are introduced to reduce this happen. The first one is use unique identity on column of tables such as game code, the identity of the game in Steam data, for example. The second is use programming methods to filter the duplicated items. 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.3\textwidth]{pics/unique_game_code.png}
+    \caption{The unique field for limiting duplicated records}
+\end{figure}
+
+As for games, some times, republishing game might cause this phenomenon. But in this dataset, the root of data type is a dictionary, which means if the data can be used, the duplicated items would not happen in theory. Depend on the field of OLTP settings, the process will output errors during collect items are inserted into database. The final method to prevent this is to check the count of selecting operation by verifying SQL and the system process information, to compare the number of them can figure out weather the same records are existed.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{pics/finished_system_info.png}
+    \caption{The summary information of whole process}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{pics/count_games_sql.png}
+    \caption{The count of games by SQL}
+\end{figure}
+
+Other properties, such as languages, genres and categories, they are collected in the "Set" programming data structure to reduce the duplicated items automatically, after that, they are inserted into the database. Even though, the application layer can make sure the name of them unique, but in database perspectives, these properties are also set as unique on their name.
+
+
+\subsection{Missing values and outlier handling}
+All the missing values are set as "Null" in database, to do this is for analyzing process to identity how many empty values, if this kind of values over the specific threshold, it means that the data is not reliable, so, the final result would be not meaningful. If the unacceptable values are detected, they also would be set as "Null", for example, the empty price will be set "Null".
+
+
+\subsection{Quality assurance}
+There is a log database in the process to collect data that cannot be treated automatically and trace of them for final verify by human. The two tables are designed to hold two processes of transmission. The first one is designed to hold the data that transformed from JSON dataset to OLTP database, the table of errors include the code of game, field name, original value, level and status. When error happen in the converting process, the program will record them for verifying after the program exited by human. 
+
+The "level" field is designed to trace the severity of errors, in programming period, if some value is correct by the system automatically, the associated log will be set "LOW" level for the final statistic work to trace. If a value is not converted and will influence the future accuracy of analysis, it is set as "HIGH" level and the status is set as "NEED REVIEW" for analysis developer to review the original values to deal with it.
+
+The second table is designed to hold the errors during translate the data from OLTP to OLAP. But in practice, the second process not catch any errors, so, this table is empty.
+
+
+\subsection{Optimization the performance of the pipeline}
+The whole process mainly consist by reading and writing, which means there are too many access to the database. Thus, the main task is to lower the "select" and "insert" stances execution, especially in loop procedure.
+
+Because the database includes serval intermediate tables for many to many relationships, to insert the all relations of games and categories, genres, etc, it will make the total number of records scale up several times. At the mean while, in normal way, if inserting a relationship between game and category for example, the identities of game and category should be searched before head, after that, their relationship can be recorded. So, there are massive operations of database. 
+
+To deal this, the transfer is separated into two subtasks. The first one is to loop and record the all properties for games, during this process, the subtask collects identifies and stores them in a dictionary. After that, to insert the games with recording their identifies also. The second process is to record the relations by retrieving identifies from dictionary. This strategy can much lower the access the database. Even though, there are two loops of the whole dataset, but, in practice, each loop costs about 3 seconds, which reduces whole time consuming from about 25 minutes to about 5 minutes.
+
+
+
+
+
+
+
+
+

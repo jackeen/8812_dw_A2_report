@@ -1,4 +1,60 @@
-\section{Data extraction and processing}
+\section{Data extraction and processing (tools discuss)}
 
 % Which tools/toolkits do you plan to use (e.g., PostgreSQL, MySQL, TSQL, Apache Spark,
 % Python) to read data from the sources based on the approach you are taking.
+
+My selected combination of tools includes Python, PostgreSQL, Docker, DataGrip and Grafana. In practice, to chose the tools is not only depend on what kind of data will be treated, but also tradeoff the situations such as learning costs, usage costs, cross platforms, the amount of data and stability of softwares. In the next subsections, I will compare and discuss the candidates for this project.
+
+Brief list of tools:
+\begin{itemize}
+    \item Docker, a cross platform isolation environment which provides easy configuration and software compatibility.
+    \item Python, a general-purpose programming language, it provides vast library to support data-related tasks. 
+    \item PostgreSQL, an open-source database, to use it holding OLTP and OLAP database.
+    \item DataGrip, the functional graph client.
+    \item Grafana, an open-source visualization tool.
+\end{itemize}
+
+
+\subsection{Running environment and Tools selection consideration}
+The running environment is the foundation of whole system, it can influence all other tools selection. Even though windows are very popular in New Zealand, but this project is not the task last for years, so, the selection of tools cannot be limited by current tools. There are lots of open source softwares can be chosen for this tasks, not only commercial softwares. 
+
+The selected dataset is allowed involving small set of samples depend on the requirements of this assignment, so, I do not need to chose the powerful tools deliberately. Otherwise, we should focus on the tools that can lower the learning, usage costs and can be deployed at anywhere. As a study project, it is very important to avoid the extra problems and learning during experiment, even though some tools are very powerful.
+
+Every tools should be popular, which means their documents, instructions and problem solutions can be easy to touch. The tools also should work on Windows, Mac OS and Linux, because sometimes we need migrate the tools or whole environment in different operating systems. But a potential limits outstanding now, the process can not handle by one software obviously, if they are running at the same environment, there are might be conflict, such as service port, which might cause the system unstable. The system should provide isolation environment.
+
+Eventually, the isolation sandbox environment with cross platform ability looks like the perfect solution. Every tools as a service isolated by the based service and they can communicate each other. So I finally decide to use Docker as the running environment. It can be deployed at mainstream operating systems and easy to pull and run the selected softwares as services.
+
+
+\subsection{Database}
+The chosen dataset includes about 110,000 games, depend on the table schema, the total records are no more than one million. Most of database software can handle them, I chose 3 mainstream candidates to compare and discuss, including SQLlite, PostgreSQL, SQLServer and MySQL.
+
+SQLlite is free, open-source and serverless database engine. It is embedded in applications to read and write database files directly without any services. The data file is cross-platform, which means developers can migrate the storage data between operating systems. It can handle over 200TB data and huge write workload, and highly support SQL standards \cite{sqlite2025}. In this project, the dataset is about 700Mb, this engine is easy to hold. Even though there are continuous writing during ETL process, but just one connection with one writing and reading simultaneously, it is not the burden. The study cost and usage cost is zero. However, it look like not the perfect option, because it cannot be deployed as a service if without any other code to support it. MySQL \cite{mysql_official_2025} is a famous open-source database with higher performance than the previous one. Its community edition is free to use, and it can be deployed in several commands in Docker as a service. But, it is maintained by Oracle, a commercial database firm, concerning become a pay-needed software. SQLServer is a commercial software \cite{microsoft_sql_server_2024}, even though these is a free version can be used, but it is limited full-featured evaluation in 180 days. And it only provides X86 version, which means developers cannot deployed it on RAM based systems. PostgreSQL \cite{postgresql_official_2025} is a totally open source with standards compliance, which means developers do not need to learn its details. It also provide ACID compliance for high reliability like others. It maintained by a global community of thousands of contributors with frequent update.
+
+PostgreSQL look like a perfect option for OLTP database depend on its maintenance, frequent updating, free to use or even modify it. And it provides cross-platform packages for variety operating systems. But in OLAP tasks, it is not the perfect option unlike ClickHouse. The main reason is that it is not optimized for OLAP tasks. However, this project not require much workload, and introducing a more database will cause more deployment and more learning time. Finally, I decided to chose PostgreSQL to handle OLTP and OLAP data in the same database.
+
+
+\subsection{Database client}
+The database client is for establishing tables, verifying the data and testing the visualization SQL in this project. Depend on the selected open-source database software, DataGrip might the perfect option, unlike BeeKeeper Studio, it provides comprehensive functionalities from code suggestion to query management, and it also be used free by students.
+
+
+\subsection{Visualization}
+% power bi, bigquery, Grafana
+PowerBI provides the powerful chart to visualize the data, it provides graphical user interface to init the chart depend on user selection. It is very simple for people who do not want to code SQL language, just need some clicks, but it need to upload the data firstly, which means I need to export whole database for it. It is a time-consuming tasks. BigQuery is like PowerBI, but it just based on cloud, and is limited in 30 days. So, I decided to use Grafana to handle this work, It can access lots of database by internet link without uploading customer data like the programming client. Moreover, it also provides several kind of charts for variety data demonstration. The downsides of Grafana are including limited ability of query generator, but it can accept SQL input which causes more SQL work and testing.
+
+
+\subsection{Programming language and libraries}
+I chose Python as the coding programming language, there are several reasons:
+\begin{itemize}
+    \item Easy to get support, its community is much more active than R language.
+    \item Easy to find database driver and the driver is stable.
+    \item Easy to integrate with AI system, several AI libraries are depended on Python, the project is easy to be powered by AI-driven computing to clean the data.
+\end{itemize}
+
+The libraries includes: 
+\begin{itemize}
+    \item "ijson": to treat the JSON data as a streaming, do not need to load the whole data at first, which lowers the time and memory consuming.
+    \item "psycopg2": provides ability to access the database and efficient ways to insert data.
+    \item "ollama": to support the LLMs invoking, it provides very simple APIs to access its service at local machine.
+\end{itemize}
+
+
