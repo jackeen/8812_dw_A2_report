@@ -47,6 +47,13 @@ The reviews cleaning is the most struggled practice in this project. As before m
 
 \begin{figure}[H]
     \centering
+    \includegraphics[width=1\textwidth]{pics/llm_cleaner_result.png}
+    \caption{The example of the review content cleaning}
+\end{figure}
+
+
+\begin{figure}[H]
+    \centering
     \includegraphics[width=0.6\textwidth]{pics/llm_code.png}
     \caption{The cleaning procedure by invoking large language model}
 \end{figure}
@@ -117,7 +124,7 @@ The whole process mainly consist by reading and writing, which means there are t
 
 Because the database includes serval intermediate tables for many to many relationships, to insert the all relations of games and categories, genres, etc, it will make the total number of records scale up several times. At the mean while, in normal way, if inserting a relationship between game and category for example, the identities of game and category should be searched before head, after that, their relationship can be recorded. So, there are massive operations of database. 
 
-To deal this, the transfer is separated into two subtasks. The first one is to loop and record the all properties for games, during this process, the subtask collects identifies and stores them in a dictionary. After that, to insert the games with recording their identifies also. The second process is to record the relations by retrieving identifies from dictionary. This strategy can much lower the access the database. Even though, there are two loops of the whole dataset, but, in practice, each loop costs about 3 seconds, which reduces whole time consuming from about 25 minutes to about 5 minutes.
+To deal this, the transfer is separated into two subtasks. The first one is to loop and record the all properties for games, during this process, the subtask collects identifies and stores them in a dictionary. After that, to insert the games with recording their identifies also. The second process is to record the relations by retrieving identifies from dictionary. This strategy can much lower the access to the database. Even though, there are two loops of the whole dataset, but, in practice, each loop costs about 3 seconds, which reduces whole time consuming from about 25 minutes to about 5 minutes in the experiment computer.
 
 
 
