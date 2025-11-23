@@ -1,4 +1,4 @@
-\section{Data extraction, processing and tools selection}
+\section{Data processing tools selection}
 
 % Which tools/toolkits do you plan to use (e.g., PostgreSQL, MySQL, TSQL, Apache Spark,
 % Python) to read data from the sources based on the approach you are taking.
@@ -25,7 +25,7 @@ Every tools should be popular, which means their documents, instructions and pro
 Eventually, the isolation sandbox environment with cross platform ability looks like the perfect solution. Every tools as a service isolated by the based service and they can communicate each other. So I finally decide to use Docker as the running environment. It can be deployed at mainstream operating systems and easy to pull and run the selected softwares as services.
 
 
-\subsection{Database}
+\subsection{Database tool}
 The chosen dataset includes about 110,000 games, depend on the table schema, the total records are no more than one million. Most of database software can handle them, I chose 3 mainstream candidates to compare and discuss, including SQLlite, PostgreSQL, SQLServer and MySQL.
 
 SQLlite is free, open-source and serverless database engine. It is embedded in applications to read and write database files directly without any services. The data file is cross-platform, which means developers can migrate the storage data between operating systems. It can handle over 200TB data and huge write workload, and highly support SQL standards \cite{sqlite2025}. In this project, the dataset is about 700Mb, this engine is easy to hold. Even though there are continuous writing during ETL process, but just one connection with one writing and reading simultaneously, it is not the burden. The study cost and usage cost is zero. However, it look like not the perfect option, because it cannot be deployed as a service if without any other code to support it. MySQL \cite{mysql_official_2025} is a famous open-source database with higher performance than the previous one. Its community edition is free to use, and it can be deployed in several commands in Docker as a service. But, it is maintained by Oracle, a commercial database firm, concerning become a pay-needed software. SQLServer is a commercial software \cite{microsoft_sql_server_2024}, even though these is a free version can be used, but it is limited full-featured evaluation in 180 days. And it only provides X86 version, which means developers cannot deployed it on RAM based systems. PostgreSQL \cite{postgresql_official_2025} is a totally open source with standards compliance, which means developers do not need to learn its details. It also provide ACID compliance for high reliability like others. It maintained by a global community of thousands of contributors with frequent update.
@@ -33,11 +33,11 @@ SQLlite is free, open-source and serverless database engine. It is embedded in a
 PostgreSQL look like a perfect option for OLTP database depend on its maintenance, frequent updating, free to use or even modify it. And it provides cross-platform packages for variety operating systems. But in OLAP tasks, it is not the perfect option unlike ClickHouse. The main reason is that it is not optimized for OLAP tasks. However, this project not require much workload, and introducing a more database will cause more deployment and more learning time. Finally, I decided to chose PostgreSQL to handle OLTP and OLAP data in the same database.
 
 
-\subsection{Database client}
+\subsection{Database client tool}
 The database client is for establishing tables, verifying the data and testing the visualization SQL in this project. Depend on the selected open-source database software, DataGrip might the perfect option, unlike BeeKeeper Studio, it provides comprehensive functionalities from code suggestion to query management, and it also be used free by students.
 
 
-\subsection{Visualization}
+\subsection{Visualization tool}
 % power bi, bigquery, Grafana
 PowerBI provides the powerful chart to visualize the data, it provides graphical user interface to init the chart depend on user selection. It is very simple for people who do not want to code SQL language, just need some clicks, but it need to upload the data firstly, which means I need to export whole database for it. It is a time-consuming tasks. BigQuery is like PowerBI, but it just based on cloud, and is limited in 30 days. So, I decided to use Grafana to handle this work, It can access lots of database by internet link without uploading customer data like the programming client. Moreover, it also provides several kind of charts for variety data demonstration. The downsides of Grafana are including limited ability of query generator, but it can accept SQL input which causes more SQL work and testing.
 
